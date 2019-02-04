@@ -1,3 +1,5 @@
+# My Trello Board Link
+https://trello.com/invite/b/yk3JwoW5/3885c55f8f35c7fba1b2cf0bf3ae808b/treasure-hunt
 # Lambda Treasure Hunt
 
 Welcome to the first annual Lambda Treasure Hunt!
