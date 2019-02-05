@@ -31,24 +31,30 @@ class App extends Component {
     // console.log(Object.keys(visited).length)
     
       while(Object.keys(visited).length < 499){
+        // console.log("this is the init id thing: ", this.state.initRoom.room_id)
         if(!visited[this.state.initRoom.room_id]){
           visited[this.state.initRoom.room_id] = this.state.initRoom.exits
           // visited[this.state.initRoom.room_id].del(checked[-1])
         }
         console.log("VISITED ==> ", visited)
         // console.log("STATE ==>", this.state)
-        
+        console.log(this.state.currrentRoom)
         while(visited[this.state.initRoom.room_id].length === 0 && checked.length > 0){
-          let prevNode = checked.pop()
+          // let prevNode = checked.pop(0)
+          let prevNode = checked.shift()
           returnedList.push(prevNode)
           this.moveRooms(prevNode)
           this.initReq()
         }
       
         let step = visited[this.state.initRoom.room_id].pop(0)
+        // save the first element in visited[room_id]
+        // delete the first element in visited[room_id]
+        // let step = Object.keys(visited[this.state.initRoom.room_id][0])
+
         checked.push(this.oppositeDirection(step))
         returnedList.push(step)
-        this.moveRooms(step)
+        setTimeout(this.moveRooms(step),15000)
         this.initReq()
     }
   localStorage.setItem('traversal', visited)
@@ -86,7 +92,9 @@ class App extends Component {
 
   componentDidMount=()=>{
     this.initReq()
+    setTimeout(()=>{this.createMap()}, 1000)
     // this.createMap()
+    
   }
   
   initReq(){
