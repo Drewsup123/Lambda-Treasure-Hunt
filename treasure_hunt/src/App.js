@@ -19,7 +19,7 @@ class App extends Component {
       },
       last : {},
       traversal : [],
-      numOfRoomsVisited : 1
+      numOfRoomsVisited : 1,
       // set default to 1 since we start out in a room
     }
   }
@@ -29,38 +29,46 @@ class App extends Component {
     let checked = []
     let returnedList = []
     // console.log(Object.keys(visited).length)
-    while(Object.keys(visited).length < 499){
-      if(!visited[this.state.initRoom.room_id]){
-        visited[this.state.initRoom.room_id] = this.state.initRoom.exits
-        // visited[this.state.initRoom.room_id].del(checked[-1])
-      }
-      console.log("v ==> ", visited[0])
-      console.log("STATE ==>", this.state)
-      while(visited[this.state.initRoom.room_id].length === 0 && checked.length > 0){
-        let prevNode = checked.pop()
-        returnedList.push(prevNode)
-        this.moveRooms(prevNode)
+    
+      while(Object.keys(visited).length < 499){
+        if(!visited[this.state.initRoom.room_id]){
+          visited[this.state.initRoom.room_id] = this.state.initRoom.exits
+          // visited[this.state.initRoom.room_id].del(checked[-1])
+        }
+        console.log("VISITED ==> ", visited)
+        // console.log("STATE ==>", this.state)
+        
+        while(visited[this.state.initRoom.room_id].length === 0 && checked.length > 0){
+          let prevNode = checked.pop()
+          returnedList.push(prevNode)
+          this.moveRooms(prevNode)
+          this.initReq()
+        }
+      
+        let step = visited[this.state.initRoom.room_id].pop(0)
+        checked.push(this.oppositeDirection(step))
+        returnedList.push(step)
+        this.moveRooms(step)
         this.initReq()
-      }
-      let step = visited[this.state.initRoom].pop(0)
-      checked.push(this.oppositeDirection(step))
-      returnedList.push(step)
-      this.moveRooms(step)
-      this.initReq()
     }
+  localStorage.setItem('traversal', visited)
   }
-  moveRooms = direction => {
+
+  moveRooms = dir => {
+    console.log("called!")
     let c = this.state.config
     // had to do this to call it in post request
-    axios.post(`${this.state.url}move`, {c,direction: direction})
+    axios.post(`${this.state.url}move`, {direction: dir}, c)
     .then(res => {
       this.setState({ initRoom: res.data , last:res.data});
       this.updateState(res.data)
+      console.log(res.data)
     })
     .catch(err => {
       console.log(err);
     });
   };
+
   oppositeDirection(direction){
     if(direction === "n"){
       return "s"
@@ -75,6 +83,7 @@ class App extends Component {
       return "e"
     }
   }
+
   componentDidMount=()=>{
     this.initReq()
     // this.createMap()
@@ -85,7 +94,8 @@ class App extends Component {
     axios.get(`${this.state.url}init`, this.state.config)
     .then(res => {
       this.setState({initRoom:res.data})
-      this.updateState(res.data)
+      // this.updateState(res.data)
+      console.log(res.data.exits)
     })
     .catch(err => {
       console.log(err)
@@ -146,14 +156,28 @@ class App extends Component {
     this.setState(traversal, visited, numExplored);
   };
 
+  handleDirectionClick = (e, direction) =>{
+    e.preventDefault()
+    e.stopPropagation()
+    this.moveRooms(direction)
+  }
+
   render() {
     return (
       <div className="App">
         <header className="App-header">
           <h1>Welcome to the Treasure Hunt!</h1>
         </header>
-        <div class="room-details">
-          <h2>Room ID: {this.state.currrentRoom}</h2>
+        <div className="room-details">
+          <h2>Room ID: {this.state.initRoom.room_id}</h2>
+ 
+            <p>Exits : {this.state.initRoom.exits}</p>
+            <p>Cooldown:{this.state.initRoom.cooldown}</p>
+            {/* <ul>
+              {/* {this.state.initRoom.players.map(player => {
+                return <li>{player}</li>
+              })} */}
+
         </div>
         <Buttons move={this.moveRooms}/>
       </div>
