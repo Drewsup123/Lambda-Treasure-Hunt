@@ -38,49 +38,24 @@ traversalPath = fill_traversal()
 
 OLD JAVASCRIPT CODE THAT DID NOT WORK JUST KEEPING IT JUST IN CASE
 
-  // fillTraversal(){
-  //   let visited = {}
-  //   visited[0] = {"n":"?","s":"?","w":"?","e":"?"}
-  //   let keysArray = []
-  //   let checked = []
-  //   let returnedList = []
-  //   while(visited.length < 499){
-  //     if(!visited[this.getRoomId()]){
-  //       visited[this.getRoomId()] = this.getRoomExits()
-           visited[player.currentRoom.id].remove(checked[-1])
-  //     }
-  //     while(visited[getRoomId()].length === 0 && checked.length > 0){
-  //       let prevNode = checked.pop()
-  //       returnedList.push(prevNode)
-  //       this.moveRooms(prevNode)
-  //     }
-  //     step = visited[getRoomId()].pop(0)
-  //     checked.append(this.oppositeDirection(step))
+#   // fillTraversal(){
+#   //   let visited = {}
+#   //   visited[0] = {"n":"?","s":"?","w":"?","e":"?"}
+#   //   let keysArray = []
+#   //   let checked = []
+#   //   let returnedList = []
+#   //   while(visited.length < 499){
+#   //     if(!visited[this.getRoomId()]){
+#   //       visited[this.getRoomId()] = this.getRoomExits()
+#         #    visited[player.currentRoom.id].remove(checked[-1])
+#   //     }
+#   //     while(visited[getRoomId()].length === 0 && checked.length > 0){
+#   //       let prevNode = checked.pop()
+#   //       returnedList.push(prevNode)
+#   //       this.moveRooms(prevNode)
+#   //     }
+#   //     step = visited[getRoomId()].pop(0)
+#   //     checked.append(this.oppositeDirection(step))
 
-  //   }
-  // }
-
-  getRoomId(){
-    let id = 1
-    axios.get(`${this.state.url}init/`, this.state.config)
-    .then(response =>{
-      console.log(this.state.roomId)
-      this.setState({roomId:response.data.room_id})
-      console.log(this.state.roomId)
-      id = response.data.room_id
-    })
-    .catch(error => {console.log(error)})
-    return this.state.roomId
-  }
-  // getRoomExits(){
-  //   axios.get(`${this.state.url}init/`, this.state.config)
-  //   .then(response => {console.log("room_id",response.data.room_id);return(response.data.exits)})
-  //   .catch(error => {alert(error)})
-  // }
-  // moveRooms(direction){
-  //   axios.post(`${this.state.url}move`, this.state.config)
-  // }
-  componentDidMount(){
-    console.log("RID", this.state.roomId)
-    this.getRoomId()
-  }
+#   //   }
+#   // }

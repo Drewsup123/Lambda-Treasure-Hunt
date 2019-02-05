@@ -8,7 +8,16 @@ class App extends Component {
     this.state = {
       url : "https://lambda-treasure-hunt.herokuapp.com/api/adv/",
       config : {headers:{"Authorization":"Token 78d053a88abb09f2c77e9d6146b585bd54629049"}},
-      initRoom : {}
+      initRoom : {},
+      currrentRoom : 0,
+      exits : {},
+      coordinates : '',
+      cooldown : 0,
+      visited : {
+        0: { n: "?", s: "?", w: "?", e: "?" }
+      },
+      last = {}
+
     }
   }
   createMap(){
@@ -28,13 +37,13 @@ class App extends Component {
         let prevNode = checked.pop()
         returnedList.push(prevNode)
         this.moveRooms(prevNode)
-        this.refreshCurrentRoom()
+        this.initReq()
       }
       let step = visited[this.state.initRoom].pop(0)
       checked.push(this.oppositeDirection(step))
       returnedList.push(step)
       this.moveRooms(step)
-      this.refreshCurrentRoom()
+      this.initReq()
     }
   }
   moveRooms = direction => {
@@ -63,20 +72,58 @@ class App extends Component {
     }
   }
   componentDidMount=()=>{
-    this.refreshCurrentRoom()
+    this.initReq()
     // this.createMap()
   }
   
-  refreshCurrentRoom(){
-    console.log("refresh current room 56")
+  initReq(){
+    console.log("init line 56")
     axios.get(`${this.state.url}init`, this.state.config)
     .then(res => {
       this.setState({initRoom:res.data})
+      this.updateState(res.data)
     })
     .catch(err => {
       console.log(err)
     })
   }
+
+  updateState = res => {
+    if ("room_id" in res) {
+      this.setState({
+        currentRoom: res.room_id,
+        exits: res.exits,
+        coordinates: res.coordinates,
+        cooldown: res.cooldown
+      });
+    }
+  };
+
+  unexploredDirection = () => {
+    let exits = this.state.exits;
+    let current = this.state.currentRoom;
+    let visited = this.state.visited;
+    let unexplored = [];
+    let directions = ["n", "s", "e", "w"];
+
+    for (let i = 0; i < directions.length; i++) {
+      if (exits.includes(directions[i])) {
+        if (visited[current][directions[i]] === "?") {
+          unexplored.push(directions[i]);
+        }
+      } else {
+        visited[current][directions[i]] = "-";
+      }
+    }
+
+    this.setState({ visited: visited });
+
+    if (unexplored.length === 0) {
+      return null;
+    } else {
+      return unexplored[Math.floor(Math.random(unexplored.length))];
+    }
+  };
 
   render() {
     return (
@@ -88,6 +135,7 @@ class App extends Component {
           <p>Description : {this.state.initRoom.description}</p>
           <p>Coordinates : {this.state.initRoom.coordinates}</p>
           <p>Exits : {this.state.initRoom.exits}</p>
+          <p>api key: {process.env.API_KEY}</p>
         </header>
       </div>
     );
