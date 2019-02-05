@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import axios from 'axios'
+import Buttons from './components/buttons'
 
 class App extends Component {
   constructor(){
@@ -16,8 +17,10 @@ class App extends Component {
       visited : {
         0: { n: "?", s: "?", w: "?", e: "?" }
       },
-      last = {}
-
+      last : {},
+      traversal : [],
+      numOfRoomsVisited : 1
+      // set default to 1 since we start out in a room
     }
   }
   createMap(){
@@ -51,7 +54,8 @@ class App extends Component {
     // had to do this to call it in post request
     axios.post(`${this.state.url}move`, {c,direction: direction})
     .then(res => {
-      this.setState({ initRoom: res.data });
+      this.setState({ initRoom: res.data , last:res.data});
+      this.updateState(res.data)
     })
     .catch(err => {
       console.log(err);
@@ -125,18 +129,33 @@ class App extends Component {
     }
   };
 
+  save = (currentRoom, nextRoom, direction) => {
+    let traversal= this.state.traversal;
+    let visited = this.state.visited;
+    let numExplored = this.state.numOfRoomsVisited;
+
+    traversal.push(direction);
+    if(nextRoom in visited){/*pass*/} 
+    else{
+      visited[nextRoom] = { n: "?", s: "?", w: "?", e: "?" };
+      numExplored++;
+    }
+    visited[currentRoom][direction] = nextRoom;
+    visited[nextRoom][this.oppositeDirection(direction)] = currentRoom;
+
+    this.setState(traversal, visited, numExplored);
+  };
+
   render() {
     return (
       <div className="App">
         <header className="App-header">
           <h1>Welcome to the Treasure Hunt!</h1>
-          <h2>Room ID : {this.state.initRoom.room_id}</h2>
-          <p>Title : {this.state.initRoom.title}</p>
-          <p>Description : {this.state.initRoom.description}</p>
-          <p>Coordinates : {this.state.initRoom.coordinates}</p>
-          <p>Exits : {this.state.initRoom.exits}</p>
-          <p>api key: {process.env.API_KEY}</p>
         </header>
+        <div class="room-details">
+          <h2>Room ID: {this.state.currrentRoom}</h2>
+        </div>
+        <Buttons move={this.moveRooms}/>
       </div>
     );
   }
