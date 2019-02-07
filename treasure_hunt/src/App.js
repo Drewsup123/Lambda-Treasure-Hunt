@@ -22,13 +22,14 @@ class App extends Component {
     room_id: 0,
     visited: new Set(),
     input : '',
-  };
+    graphCoords : null
+  }
 
   componentDidMount() {
     // finds map in local storage and saves it to graph object
     if (localStorage.hasOwnProperty('map')) {
       let value = JSON.parse(localStorage.getItem('map'));
-      this.setState({ graph: value });
+      this.setState({ graph: value , graphCoords : Object.keys(this.state.graph)});
     }
 
     this.initReq();
@@ -309,7 +310,11 @@ class App extends Component {
           <p>North -- South -- West -- East</p>
           <Buttons move={this.moveRooms}/>
         </div>
-        
+        <div className="MAP">
+          {
+            
+          }
+        </div>
         {/* <h1>{this.state.generating ? "Generating Graph..." : "not generating"}</h1>
         <div onClick={this.handleClick}>Traverse</div> */}
         
