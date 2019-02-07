@@ -2,62 +2,261 @@ import React, { Component } from 'react';
 import './App.css';
 import axios from 'axios'
 import Buttons from './components/buttons'
+import ReactTimeout from "react-timeout";
 
 class App extends Component {
-  constructor(){
-    super()
-    this.state = {
-      url : "https://lambda-treasure-hunt.herokuapp.com/api/adv/",
-      config : {headers:{"Authorization":"Token 78d053a88abb09f2c77e9d6146b585bd54629049"}},
-      initRoom : {},
-      currrentRoom : 0,
-      exits : {},
-      coordinates : '',
-      cooldown : 0,
-      visited : {
-        0: { n: "?", s: "?", w: "?", e: "?" }
-      },
-      last : {},
-      traversal : [],
-      numOfRoomsVisited : 1,
-      // set default to 1 since we start out in a room
-    }
-  }
-  createMap(){
-    let visited = {}
-    visited[0] = {"n":"?","s":"?","w":"?","e":"?"}
-    let checked = []
-    let returnedList = []
-    // console.log(Object.keys(visited).length)
-    
-      while(Object.keys(visited).length < 499){
-        // console.log("this is the init id thing: ", this.state.initRoom.room_id)
-        if(!visited[this.state.initRoom.room_id]){
-          visited[this.state.initRoom.room_id] = this.state.initRoom.exits
-          // visited[this.state.initRoom.room_id].del(checked[-1])
-        }
-        console.log("VISITED ==> ", visited)
-        // console.log("STATE ==>", this.state)
-        console.log(this.state.currrentRoom)
-        while(visited[this.state.initRoom.room_id].length === 0 && checked.length > 0){
-          // let prevNode = checked.pop(0)
-          let prevNode = checked.shift()
-          returnedList.push(prevNode)
-          this.moveRooms(prevNode)
-          this.initReq()
-        }
-      
-        let step = visited[this.state.initRoom.room_id].pop(0)
-        // save the first element in visited[room_id]
-        // delete the first element in visited[room_id]
-        // let step = Object.keys(visited[this.state.initRoom.room_id][0])
+  state = {
+    url : "https://lambda-treasure-hunt.herokuapp.com/api/adv/",
+    config : {headers:{"Authorization":"Token 78d053a88abb09f2c77e9d6146b585bd54629049"}},
+    coords: { x: 50, y: 60 },
+    cooldown: 15,
+    error: '',
+    exits: [],
+    players : [],
+    generating: false,
+    graph: {},
+    inverse: { n: 's', s: 'n', w: 'e', e: 'w' },
+    message: '',
+    path: [],
+    progress: 0,
+    room_id: 0,
+    visited: new Set(),
+    input : '',
+  };
 
-        checked.push(this.oppositeDirection(step))
-        returnedList.push(step)
-        setTimeout(this.moveRooms(step),15000)
-        this.initReq()
+  componentDidMount() {
+    // finds map in local storage and saves it to graph object
+    if (localStorage.hasOwnProperty('map')) {
+      let value = JSON.parse(localStorage.getItem('map'));
+      this.setState({ graph: value });
     }
-  localStorage.setItem('traversal', visited)
+
+    this.initReq();
+  }
+
+  createMap = () => {
+    let unknownDirections = this.unexploredDirections();
+    if (unknownDirections.length) {
+      let move = unknownDirections[0];
+      this.moveRoomsByID(move);
+    } else {
+      clearInterval(this.interval);
+      let path = this.findShortestPath();
+      let count = 1;
+      for (let direction of path) {
+        console.log(direction);
+        for (let d in direction) {
+          setTimeout(() => {
+            this.moveRoomsByID(d);
+          }, this.state.cooldown * 1000 * count);
+          count++;
+        }
+      }
+      console.log('here');
+      this.interval = setInterval(
+        this.createMap,
+        this.state.cooldown * 1000 * count
+      );
+      count = 1;
+    }
+
+    this.updateVisited();
+  };
+
+  updateVisited = () => {
+    // UPDATE PROGRESS
+    let visited = new Set(this.state.set);
+    for (let key in this.state.graph) {
+      if (!visited.has(key)) {
+        let qms = [];
+        for (let direction in key) {
+          if (key[direction] === '?') {
+            qms.push(direction);
+          }
+        }
+        if (!qms.length) {
+          visited.add(key);
+        }
+      }
+    }
+    let progress = visited.size / 500;
+    this.setState({ visited, progress });
+  };
+
+  findShortestPath = (start = this.state.room_id, target = '?') => {
+    let { graph } = this.state;
+    let queue = [];
+    let visited = new Set();
+    for (let room in graph[start][1]) {
+      queue = [...queue, [{ [room]: graph[start][1][room] }]];
+    }
+
+    while (queue.length) {
+      let dequeued = queue.shift();
+
+      let last_room = dequeued[dequeued.length - 1];
+
+      for (let exit in last_room) {
+        if (last_room[exit] === target) {
+          dequeued.pop();
+          return dequeued;
+        } else {
+          visited.add(last_room[exit]);
+
+          for (let path in graph[last_room[exit]][1]) {
+            if (visited.has(graph[last_room[exit]][1][path]) === false) {
+              let path_copy = Array.from(dequeued);
+              path_copy.push({ [path]: graph[last_room[exit]][1][path] });
+
+              queue.push(path_copy);
+            }
+          }
+        }
+      }
+    }
+  };
+
+  unexploredDirections = () => {
+    let unknownDirections = [];
+    let directions = this.state.graph[this.state.room_id][1];
+    for (let direction in directions) {
+      if (directions[direction] === '?') {
+        unknownDirections.push(direction);
+      }
+    }
+    return unknownDirections;
+  };
+
+  moveRoomsByID = async (move, next_room_id = null) => {
+    let data;
+    if (next_room_id) {
+      data = {
+        direction: move,
+        next_room_id: toString(next_room_id)
+      };
+    } else {
+      data = {
+        direction: move
+      };
+    }
+    try {
+      const response = await axios({
+        method: 'post',
+        url: `https://lambda-treasure-hunt.herokuapp.com/api/adv/move/`,
+        headers: {
+          Authorization: "Token 78d053a88abb09f2c77e9d6146b585bd54629049"
+        },
+        data
+      });
+
+      let previous_room_id = this.state.room_id;
+      console.log(`PREVIOUS ROOM: ${previous_room_id}`);
+      //   Update graph
+      let graph = this.updateGraph(
+        response.data.room_id,
+        this.parseCoords(response.data.coordinates),
+        response.data.exits,
+        previous_room_id,
+        move
+      );
+
+      this.setState({
+        room_id: response.data.room_id,
+        coords: this.parseCoords(response.data.coordinates),
+        exits: [...response.data.exits],
+        path: [...this.state.path, move],
+        cooldown: response.data.cooldown,
+        graph
+      });
+      console.log(response.data);
+    } catch (error) {
+      console.log('Something went wrong moving...');
+    }
+  };
+
+  initReq = () => {
+    axios.get(`${this.state.url}init`, this.state.config)
+      .then(res => {
+        this.updateState(res.data)
+        let graph = this.updateGraph(
+          res.data.room_id,
+          this.parseCoords(res.data.coordinates),
+          res.data.exits
+        );
+        this.setState(prevState => ({
+          room_id: res.data.room_id,
+          coords: this.parseCoords(res.data.coordinates),
+          exits: [...res.data.exits],
+          ooldown: res.data.cooldown,
+          graph
+        }));
+        this.updateVisited();
+      })
+      .catch(err => console.log('There was an error.'));
+  };
+
+  updateGraph = (id, coords, exits, prev = null, move = null) => {
+    const { inverse } = this.state;
+
+    let graph = Object.assign({}, this.state.graph);
+    if (!this.state.graph[id]) {
+      let arr = [];
+      arr.push(coords);
+      const moves = {};
+      exits.forEach(exit => {
+        moves[exit] = '?';
+      });
+      arr.push(moves);
+      graph = { ...graph, [id]: arr };
+    }
+    if (prev !== null && move && prev !== id) {
+      graph[prev][1][move] = id;
+      graph[id][1][inverse[move]] = prev;
+    }
+
+    localStorage.setItem('map', JSON.stringify(graph));
+    return graph;
+  };
+
+  parseCoords = coords => {
+    const coordsObject = {};
+    const coordsArr = coords.replace(/[{()}]/g, '').split(',');
+
+    coordsArr.forEach(coord => {
+      coordsObject['x'] = parseInt(coordsArr[0]);
+      coordsObject['y'] = parseInt(coordsArr[1]);
+    });
+
+    return coordsObject;
+  };
+
+  updateState = res => {
+    if('room_id' in res){
+      this.setState({
+        room_id: res.room_id,
+        exits: res.exits,
+        // coords: res.coordinates,
+        cooldown: res.cooldown,
+        players: res.players
+      });
+    }else{
+      console.log(res)
+    }
+  };
+
+  handleClick = () => {
+    this.setState({ generating: true });
+    this.interval = setInterval(this.createMap, this.state.cooldown * 1000);
+  };
+
+  moveToRoom = room =>{
+    let current = this.state.room_id
+    let current_coords = this.state.coords
+    let target_coords = this.state.graph[`${room}`][0]
+    let differencex = current_coords['x'] - target_coords['x']
+    let differencey = current_coords['y'] - target_coords['y']
+    console.log(differencex, differencey)
+
   }
 
   moveRooms = dir => {
@@ -66,109 +265,30 @@ class App extends Component {
     // had to do this to call it in post request
     axios.post(`${this.state.url}move`, {direction: dir}, c)
     .then(res => {
-      this.setState({ initRoom: res.data , last:res.data});
-      this.updateState(res.data)
       console.log(res.data)
+      this.updateState(res.data)
     })
     .catch(err => {
       console.log(err);
     });
   };
 
-  oppositeDirection(direction){
-    if(direction === "n"){
-      return "s"
-    }
-    if(direction === "s"){
-      return "n"
-    }
-    if(direction === "e"){
-      return "w"
-    }
-    if(direction === "w"){
-      return "e"
+  onChangeHandler = e =>{
+    let a = [1,2,3,4,5,6,7,8,9,0]
+    console.log(e.target.value)
+    if(!(e.target.value[e.target.value.length -1] in a)){
+      alert("unacceptable parameter")
+      e.target.value = ''
+    }else{
+      this.setState({...this.state.input, input : e.target.value})
     }
   }
 
-  componentDidMount=()=>{
-    this.initReq()
-    setTimeout(()=>{this.createMap()}, 1000)
-    // this.createMap()
-    
-  }
-  
-  initReq(){
-    console.log("init line 56")
-    axios.get(`${this.state.url}init`, this.state.config)
-    .then(res => {
-      this.setState({initRoom:res.data})
-      // this.updateState(res.data)
-      console.log(res.data.exits)
-    })
-    .catch(err => {
-      console.log(err)
-    })
-  }
-
-  updateState = res => {
-    if ("room_id" in res) {
-      this.setState({
-        currentRoom: res.room_id,
-        exits: res.exits,
-        coordinates: res.coordinates,
-        cooldown: res.cooldown
-      });
-    }
-  };
-
-  unexploredDirection = () => {
-    let exits = this.state.exits;
-    let current = this.state.currentRoom;
-    let visited = this.state.visited;
-    let unexplored = [];
-    let directions = ["n", "s", "e", "w"];
-
-    for (let i = 0; i < directions.length; i++) {
-      if (exits.includes(directions[i])) {
-        if (visited[current][directions[i]] === "?") {
-          unexplored.push(directions[i]);
-        }
-      } else {
-        visited[current][directions[i]] = "-";
-      }
-    }
-
-    this.setState({ visited: visited });
-
-    if (unexplored.length === 0) {
-      return null;
-    } else {
-      return unexplored[Math.floor(Math.random(unexplored.length))];
-    }
-  };
-
-  save = (currentRoom, nextRoom, direction) => {
-    let traversal= this.state.traversal;
-    let visited = this.state.visited;
-    let numExplored = this.state.numOfRoomsVisited;
-
-    traversal.push(direction);
-    if(nextRoom in visited){/*pass*/} 
-    else{
-      visited[nextRoom] = { n: "?", s: "?", w: "?", e: "?" };
-      numExplored++;
-    }
-    visited[currentRoom][direction] = nextRoom;
-    visited[nextRoom][this.oppositeDirection(direction)] = currentRoom;
-
-    this.setState(traversal, visited, numExplored);
-  };
-
-  handleDirectionClick = (e, direction) =>{
+  onSubmitHandler = (e, value=this.state.input) => {
     e.preventDefault()
-    e.stopPropagation()
-    this.moveRooms(direction)
+    this.moveToRoom(value)
   }
+
 
   render() {
     return (
@@ -176,18 +296,23 @@ class App extends Component {
         <header className="App-header">
           <h1>Welcome to the Treasure Hunt!</h1>
         </header>
-        <div className="room-details">
-          <h2>Room ID: {this.state.initRoom.room_id}</h2>
- 
-            <p>Exits : {this.state.initRoom.exits}</p>
-            <p>Cooldown:{this.state.initRoom.cooldown}</p>
-            {/* <ul>
-              {/* {this.state.initRoom.players.map(player => {
-                return <li>{player}</li>
-              })} */}
-
+        <div className="control-menu">
+          <h2>Room Details</h2>
+          <p><strong>Room ID: </strong>{this.state.room_id}</p>
+          <p><strong>Players:</strong> {this.state.players.map(player => <li>{player}</li>)}</p>
+          <p><strong>Exits:</strong> {this.state.exits}</p>
+          <p><strong>Coordinates: </strong> x:{this.state.coords['x']}, y:{this.state.coords['y']}</p>
+          <p><strong>Exits:</strong> {this.state.exits}</p>
+          <p><strong>Cooldown:</strong> {this.state.cooldown}</p>
+          <input type="text" placeholder="target value here" onChange={this.onChangeHandler}/>
+          <input type='submit' onClick={this.onSubmitHandler}/>
+          <p>North -- South -- West -- East</p>
+          <Buttons move={this.moveRooms}/>
         </div>
-        <Buttons move={this.moveRooms}/>
+        
+        {/* <h1>{this.state.generating ? "Generating Graph..." : "not generating"}</h1>
+        <div onClick={this.handleClick}>Traverse</div> */}
+        
       </div>
     );
   }
