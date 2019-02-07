@@ -5,6 +5,7 @@ import Buttons from './components/buttons'
 import ReactTimeout from "react-timeout";
 import Map from './components/map'
 
+
 class App extends Component {
   state = {
     url : "https://lambda-treasure-hunt.herokuapp.com/api/adv/",
@@ -28,7 +29,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    // finds map in local storage and saves it to graph object
+    // finds map in local storage and saves it to graph as an object
     if (localStorage.hasOwnProperty('map')) {
       let value = JSON.parse(localStorage.getItem('map'));
       this.setState({ graph: value });
@@ -303,7 +304,7 @@ class App extends Component {
           <div className="control-menu">
             <h2>Room Details</h2>
             <p><strong>Room ID: </strong>{this.state.room_id}</p>
-            <p><strong>Players:</strong> <ol>{this.state.players.map(player => <li>{player}</li>)}</ol></p>
+            <p><strong>Players:</strong>{this.state.players.map(player => <li>{player}</li>)}</p>
             <p><strong>Exits:</strong> {this.state.exits}</p>
             <p><strong>Coordinates: </strong> x:{this.state.coords['x']}, y:{this.state.coords['y']}</p>
             <p><strong>Exits:</strong> {this.state.exits}</p>
