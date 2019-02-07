@@ -306,12 +306,11 @@ class App extends Component {
             <p><strong>Cooldown:</strong> {this.state.cooldown}</p>
             <input type="text" placeholder="target value here" onChange={this.onChangeHandler}/>
             <input type='submit' onClick={this.onSubmitHandler}/>
-            <p>North -- South -- West -- East</p>
             <Buttons move={this.moveRooms}/>
           </div>
         </div>
         <Map graph={this.state.graph}/>
-        <p><strong>Current Players In room {this.state.room_id}:</strong>{this.state.players.map(player => <li>{player}</li>)}</p>
+        <p className="players"><strong>Current Players In room {this.state.room_id}:</strong>{this.state.players.map(player => <li>{player}</li>)}</p>
         {/* <h1>{this.state.generating ? "Generating Graph..." : "not generating"}</h1>
         <div onClick={this.handleClick}>Traverse</div> */}
         

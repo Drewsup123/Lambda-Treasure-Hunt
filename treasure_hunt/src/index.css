@@ -6,6 +6,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(90deg, rgba(2,0,36,1) 15%, rgba(9,9,121,1) 62%, rgba(0,212,255,1) 100%);
 }
 
 code {
@@ -16,7 +17,9 @@ code {
 .App {
   text-align: center;
   width:100%;
+  height: 100vh;
   display: flex;
+  justify-content: center;
 }
 
 .App-logo {
@@ -78,6 +81,9 @@ button{
   outline: none;
   border-bottom: 0.15em solid rgba(0,0,0,0.5);
 }
+.buttons{
+  margin-top:50px;
+}
 
 button.active,
 button:active{
@@ -132,7 +138,29 @@ button .arrow-down {
   border-right-width: 1em;
   margin-bottom: -0.25em;
 }
+.button-axes{
+  width:49%;
+}
+.axes-U{
+  width:52%;
+}
+.axes-D{
+  width:52%;
+}
 
 .side-menu{
-
+  width:10%;
+  height:100%;
+  background: linear-gradient(90deg, rgba(105,100,100,1) 15%, rgba(207,207,207,1) 62%, rgba(255,255,255,1) 100%);
+}
+.players{
+  margin:0;
+  width: 10%;
+  background: linear-gradient(90deg, rgba(105,100,100,1) 15%, rgba(207,207,207,1) 62%, rgba(255,255,255,1) 100%);
+  height:100%;
+}
+.map{
+  border-right:2px solid rgb(0, 0, 0);
+  border-left:2px solid rgb(0, 0, 0);
+  background-image: url('https://torange.biz/photofx/19/8/image-profile-picture-old-paper-texture-19023.jpg')
 }
