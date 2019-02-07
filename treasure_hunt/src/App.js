@@ -3,6 +3,7 @@ import './App.css';
 import axios from 'axios'
 import Buttons from './components/buttons'
 import ReactTimeout from "react-timeout";
+import Map from './components/map'
 
 class App extends Component {
   state = {
@@ -22,14 +23,15 @@ class App extends Component {
     room_id: 0,
     visited: new Set(),
     input : '',
-    graphCoords : null
+    graphCoords : null,
+    graphDirections : null,
   }
 
   componentDidMount() {
     // finds map in local storage and saves it to graph object
     if (localStorage.hasOwnProperty('map')) {
       let value = JSON.parse(localStorage.getItem('map'));
-      this.setState({ graph: value , graphCoords : Object.keys(this.state.graph)});
+      this.setState({ graph: value });
     }
 
     this.initReq();
@@ -294,27 +296,26 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <h1>Welcome to the Treasure Hunt!</h1>
-        </header>
-        <div className="control-menu">
-          <h2>Room Details</h2>
-          <p><strong>Room ID: </strong>{this.state.room_id}</p>
-          <p><strong>Players:</strong> {this.state.players.map(player => <li>{player}</li>)}</p>
-          <p><strong>Exits:</strong> {this.state.exits}</p>
-          <p><strong>Coordinates: </strong> x:{this.state.coords['x']}, y:{this.state.coords['y']}</p>
-          <p><strong>Exits:</strong> {this.state.exits}</p>
-          <p><strong>Cooldown:</strong> {this.state.cooldown}</p>
-          <input type="text" placeholder="target value here" onChange={this.onChangeHandler}/>
-          <input type='submit' onClick={this.onSubmitHandler}/>
-          <p>North -- South -- West -- East</p>
-          <Buttons move={this.moveRooms}/>
+        <div className="side-menu">
+          <header className="App-header">
+            <h1>Welcome to the Treasure Hunt!</h1>
+          </header>
+          <div className="control-menu">
+            <h2>Room Details</h2>
+            <p><strong>Room ID: </strong>{this.state.room_id}</p>
+            <p><strong>Players:</strong> <ol>{this.state.players.map(player => <li>{player}</li>)}</ol></p>
+            <p><strong>Exits:</strong> {this.state.exits}</p>
+            <p><strong>Coordinates: </strong> x:{this.state.coords['x']}, y:{this.state.coords['y']}</p>
+            <p><strong>Exits:</strong> {this.state.exits}</p>
+            <p><strong>Cooldown:</strong> {this.state.cooldown}</p>
+            <input type="text" placeholder="target value here" onChange={this.onChangeHandler}/>
+            <input type='submit' onClick={this.onSubmitHandler}/>
+            <p>North -- South -- West -- East</p>
+            <Buttons move={this.moveRooms}/>
+          </div>
         </div>
-        <div className="MAP">
-          {
-            
-          }
-        </div>
+        <Map graph={this.state.graph}/>
+        
         {/* <h1>{this.state.generating ? "Generating Graph..." : "not generating"}</h1>
         <div onClick={this.handleClick}>Traverse</div> */}
         
