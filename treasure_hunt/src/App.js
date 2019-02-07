@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import './App.css';
 import axios from 'axios'
 import Buttons from './components/buttons'
 import ReactTimeout from "react-timeout";
@@ -298,13 +297,9 @@ class App extends Component {
     return (
       <div className="App">
         <div className="side-menu">
-          <header className="App-header">
-            <h1>Welcome to the Treasure Hunt!</h1>
-          </header>
           <div className="control-menu">
             <h2>Room Details</h2>
             <p><strong>Room ID: </strong>{this.state.room_id}</p>
-            <p><strong>Players:</strong>{this.state.players.map(player => <li>{player}</li>)}</p>
             <p><strong>Exits:</strong> {this.state.exits}</p>
             <p><strong>Coordinates: </strong> x:{this.state.coords['x']}, y:{this.state.coords['y']}</p>
             <p><strong>Exits:</strong> {this.state.exits}</p>
@@ -316,7 +311,7 @@ class App extends Component {
           </div>
         </div>
         <Map graph={this.state.graph}/>
-        
+        <p><strong>Current Players In room {this.state.room_id}:</strong>{this.state.players.map(player => <li>{player}</li>)}</p>
         {/* <h1>{this.state.generating ? "Generating Graph..." : "not generating"}</h1>
         <div onClick={this.handleClick}>Traverse</div> */}
         

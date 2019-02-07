@@ -55,12 +55,12 @@ class Map extends React.Component{
                     {/* {this.state.lines.map(line => (
                         <LineSeries strokeWidth="3" color="#E5E5E5" data={line} />
                     ))} */}
-                    <XYPlot width={200} height={200}>
+                    <XYPlot width={1000} height={1000}>
                         <MarkSeries
                             className="mark-series-example"
                             strokeWidth={5}
                             opacity="1"
-                            size="2"
+                            size="1"
                             color="#525959"
                             data={this.state.coords}
                         />
