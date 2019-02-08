@@ -246,11 +246,13 @@ class App extends Component {
         room_id: res.room_id,
         exits: res.exits,
         currentCoords: this.parseCoords(res.coordinates),
+        coords : this.parseCoords(res.coordinates),
         cooldown: res.cooldown,
         players: res.players,
         message: res.description,
-        items : res.items
+        items : res.items,
       });
+      console.log(this.state.coords)
       this.countdown(res.cooldown)
     }else{
       console.log(res)
