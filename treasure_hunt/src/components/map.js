@@ -31,15 +31,17 @@ class Map extends React.Component{
         let c = []
         for(let room in map){
             for(let adjacentroom in map[room][1]){
-                c.push([map[room][1], map[map[room][1][adjacentroom][0]]])
+                console.log(map[room][0])
+                c.push(map[room][0])
             }
         }
+        console.log(c)
         this.setState({lines : c})
     }
 
     generateMap = () =>{
         this.storeCoords()
-        // this.createLines()
+        this.createLines()
         // setTimeout(() => {
         //     console.log("coords ==>", this.state.coords)
         //     console.log("Lines ==> ", this.state.lines)
@@ -61,7 +63,7 @@ class Map extends React.Component{
                     ))} */}
                     
                     <XYPlot width={1000} height={1000}>
-                        <LineSeries strokeWidth="10"color="#ff0000" data={this.state.test}/>
+                        <LineSeries strokeWidth="10"color="#ff0000" data={this.state.lines}/>
                         <MarkSeries
                             className="mark-series-example"
                             strokeWidth={5}

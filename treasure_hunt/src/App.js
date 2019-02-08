@@ -298,12 +298,10 @@ class App extends Component {
   countdown = start => {
     let num = start
     setTimeout(()=>{
-      console.log("this is num", num)
       if(num === 0){
         this.setState({count : "done"})
         return 0
       }else{
-        console.log("else")
         this.setState({count : num})
         this.countdown(num-1)
       }
