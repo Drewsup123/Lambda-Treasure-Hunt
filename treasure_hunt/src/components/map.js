@@ -18,6 +18,7 @@ class Map extends React.Component{
     }
 
     storeCoords = () => {
+        console.log("store coords")
         const map = this.props.graph
         let c = []
         for(let room in map){
@@ -29,10 +30,16 @@ class Map extends React.Component{
     createLines = () =>{
         const map = this.props.graph
         let c = []
+        console.log('create lines')
         for(let room in map){
             for(let adjacentroom in map[room][1]){
-                console.log(map[room][0])
-                c.push(map[room][0])
+                // console.log(map[room][0])
+                // console.log(map[map[room]])
+                if(typeof(map[map[room][1][adjacentroom]]) === 'undefined'){}
+                else{
+                    console.log("V::::===>",map[map[room][1][adjacentroom]][1])
+                    c.push([map[room][0], map[map[room][1][adjacentroom]][0]]);
+                }
             }
         }
         console.log(c)
@@ -63,15 +70,19 @@ class Map extends React.Component{
                     ))} */}
                     
                     <XYPlot width={1000} height={1000}>
-                        <LineSeries strokeWidth="10"color="#ff0000" data={this.state.lines}/>
+                        {this.state.lines.map(points => 
+                            <LineSeries strokeWidth="2"color="#BAB9B9" data={points}/>
+                        )}
+                        {/* <LineSeries strokeWidth="10"color="#ff0000" data={this.state.lines}/> */}
                         <MarkSeries
                             className="mark-series-example"
-                            strokeWidth={5}
+                            strokeWidth={10}
                             opacity="1"
                             size="3"
                             color="#525959"
                             data={this.state.coords}
                         />
+                        <MarkSeries strokeWidth={10} data={[this.props.current]} />
                     </XYPlot>
                 
                     

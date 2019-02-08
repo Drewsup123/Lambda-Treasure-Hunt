@@ -325,7 +325,7 @@ class App extends Component {
             <Buttons move={this.moveRooms}/>
           </div>
         </div>
-        <Map graph={this.state.graph}/>
+        <Map graph={this.state.graph} current={this.state.coords}/>
         <p className="players"><strong>Current Players In room {this.state.room_id}:</strong>{this.state.players.map(player => <li>{player}</li>)}</p>
         {/* <h1>{this.state.generating ? "Generating Graph..." : "not generating"}</h1>
         <div onClick={this.handleClick}>Traverse</div> */}
