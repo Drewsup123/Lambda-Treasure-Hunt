@@ -37,12 +37,12 @@ class Map extends React.Component{
                 // console.log(map[map[room]])
                 if(typeof(map[map[room][1][adjacentroom]]) === 'undefined'){}
                 else{
-                    console.log("V::::===>",map[map[room][1][adjacentroom]][1])
+                    // console.log("V::::===>",map[map[room][1][adjacentroom]][1])
                     c.push([map[room][0], map[map[room][1][adjacentroom]][0]]);
                 }
             }
         }
-        console.log(c)
+        // console.log(c)
         this.setState({lines : c})
     }
 

@@ -25,7 +25,8 @@ class App extends Component {
     input : '',
     graphCoords : null,
     graphDirections : null,
-    count : 0
+    count : 0,
+    findPath : "please input value"
   }
 
   componentDidMount() {
@@ -242,7 +243,8 @@ class App extends Component {
         exits: res.exits,
         // coords: res.coordinates,
         cooldown: res.cooldown,
-        players: res.players
+        players: res.players,
+        message: res.description
       });
       this.countdown(res.cooldown)
     }else{
@@ -254,16 +256,6 @@ class App extends Component {
     this.setState({ generating: true });
     this.interval = setInterval(this.createMap, this.state.cooldown * 1000);
   };
-
-  moveToRoom = room =>{
-    let current = this.state.room_id
-    let current_coords = this.state.coords
-    let target_coords = this.state.graph[`${room}`][0]
-    let differencex = current_coords['x'] - target_coords['x']
-    let differencey = current_coords['y'] - target_coords['y']
-    console.log(differencex, differencey)
-
-  }
 
   moveRooms = dir => {
     console.log("called!")
@@ -292,7 +284,15 @@ class App extends Component {
 
   onSubmitHandler = (e, value=this.state.input) => {
     e.preventDefault()
-    this.moveToRoom(value)
+    const path = this.findShortestPath(this.state.room_id, value)
+    this.setState({findPath : path})
+  }
+
+  collectTreasure = () => {
+    axios.post(`${this.state.url}take`, {"name" : "treasure"}, this.state.config)
+    .then(response => {
+
+    })
   }
 
   countdown = start => {
@@ -308,7 +308,6 @@ class App extends Component {
     },1000)
   }
 
-
   render() {
     return (
       <div className="App">
@@ -319,10 +318,12 @@ class App extends Component {
             <p><strong>Exits:</strong> {this.state.exits}</p>
             <p><strong>Coordinates: </strong> x:{this.state.coords['x']}, y:{this.state.coords['y']}</p>
             <p><strong>Exits:</strong> {this.state.exits}</p>
-            <p><strong>Cooldown:</strong> {this.state.cooldown}: count : {this.state.count}</p>
+            <p><strong>Cooldown:</strong> {this.state.count}</p>
             <input type="text" placeholder="target value here" onChange={this.onChangeHandler}/>
             <input type='submit' onClick={this.onSubmitHandler}/>
+            <p>{this.state.findPath}</p>
             <Buttons move={this.moveRooms}/>
+            <p>{this.state.message}</p>
           </div>
         </div>
         <Map graph={this.state.graph} current={this.state.coords}/>
