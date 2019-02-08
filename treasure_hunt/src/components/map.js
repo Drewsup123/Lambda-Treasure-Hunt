@@ -13,12 +13,9 @@ class Map extends React.Component{
                 {x: 60, y: 60},
                 {x: 61, y: 60},
                 {x: 59, y: 60},
-                {x:60, y:61}
             ]
         }
     }
-
-    
 
     storeCoords = () => {
         const map = this.props.graph

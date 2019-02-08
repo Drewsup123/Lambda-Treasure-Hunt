@@ -25,6 +25,7 @@ class App extends Component {
     input : '',
     graphCoords : null,
     graphDirections : null,
+    count : 0
   }
 
   componentDidMount() {
@@ -190,10 +191,11 @@ class App extends Component {
           room_id: res.data.room_id,
           coords: this.parseCoords(res.data.coordinates),
           exits: [...res.data.exits],
-          ooldown: res.data.cooldown,
+          cooldown: res.data.cooldown,
           graph
         }));
         this.updateVisited();
+        this.countdown(res.data.cooldown)
       })
       .catch(err => console.log('There was an error.'));
   };
@@ -242,6 +244,7 @@ class App extends Component {
         cooldown: res.cooldown,
         players: res.players
       });
+      this.countdown(res.cooldown)
     }else{
       console.log(res)
     }
@@ -292,6 +295,21 @@ class App extends Component {
     this.moveToRoom(value)
   }
 
+  countdown = start => {
+    let num = start
+    setTimeout(()=>{
+      console.log("this is num", num)
+      if(num === 0){
+        this.setState({count : "done"})
+        return 0
+      }else{
+        console.log("else")
+        this.setState({count : num})
+        this.countdown(num-1)
+      }
+    },1000)
+  }
+
 
   render() {
     return (
@@ -303,7 +321,7 @@ class App extends Component {
             <p><strong>Exits:</strong> {this.state.exits}</p>
             <p><strong>Coordinates: </strong> x:{this.state.coords['x']}, y:{this.state.coords['y']}</p>
             <p><strong>Exits:</strong> {this.state.exits}</p>
-            <p><strong>Cooldown:</strong> {this.state.cooldown}</p>
+            <p><strong>Cooldown:</strong> {this.state.cooldown}: count : {this.state.count}</p>
             <input type="text" placeholder="target value here" onChange={this.onChangeHandler}/>
             <input type='submit' onClick={this.onSubmitHandler}/>
             <Buttons move={this.moveRooms}/>
