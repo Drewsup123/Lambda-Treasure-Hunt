@@ -166,3 +166,10 @@ button .arrow-down {
   border-left:2px solid rgb(0, 0, 0);
   background-image: url('https://torange.biz/photofx/19/8/image-profile-picture-old-paper-texture-19023.jpg')
 }
+.collect-treasure{
+  border: 5px solid rgb(119, 96, 31);
+}
+.collect-treasure:hover{
+  background:gold;
+  cursor: pointer;
+}

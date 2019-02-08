@@ -82,7 +82,7 @@ class Map extends React.Component{
                             color="#525959"
                             data={this.state.coords}
                         />
-                        <MarkSeries strokeWidth={10} data={[this.props.current]} />
+                        <MarkSeries color="red" strokeWidth={10} data={[this.props.current]} />
                     </XYPlot>
                 
                     

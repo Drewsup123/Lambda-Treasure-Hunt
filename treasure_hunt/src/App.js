@@ -26,7 +26,10 @@ class App extends Component {
     graphCoords : null,
     graphDirections : null,
     count : 0,
-    findPath : "please input value"
+    findPath : "please input value",
+    treasureMessage : '',
+    items : [],
+    playerItems : null
   }
 
   componentDidMount() {
@@ -244,7 +247,8 @@ class App extends Component {
         // coords: res.coordinates,
         cooldown: res.cooldown,
         players: res.players,
-        message: res.description
+        message: res.description,
+        items : res.items
       });
       this.countdown(res.cooldown)
     }else{
@@ -290,8 +294,12 @@ class App extends Component {
 
   collectTreasure = () => {
     axios.post(`${this.state.url}take`, {"name" : "treasure"}, this.state.config)
-    .then(response => {
-
+    .then(res => {
+      console.log("pick up called")
+      this.setState({treasureMessage : res.data.messages})
+    })
+    .catch(err => {
+      console.log("error grabbing treasure",err)
     })
   }
 
@@ -324,6 +332,9 @@ class App extends Component {
             <p>{this.state.findPath}</p>
             <Buttons move={this.moveRooms}/>
             <p>{this.state.message}</p>
+            <h3>Items: {this.state.items ? "nothing here :(" : this.state.items}</h3>
+            <div class="collect-treasure" onClick={this.collectTreasure}>$ Collect Treasure $</div>
+            <p>{this.state.treasureMessage}</p>
           </div>
         </div>
         <Map graph={this.state.graph} current={this.state.coords}/>
