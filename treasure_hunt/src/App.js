@@ -29,7 +29,8 @@ class App extends Component {
     findPath : "please input value",
     treasureMessage : '',
     items : [],
-    playerItems : null
+    playerItems : null,
+    currentCoords : {}
   }
 
   componentDidMount() {
@@ -244,7 +245,7 @@ class App extends Component {
       this.setState({
         room_id: res.room_id,
         exits: res.exits,
-        // coords: res.coordinates,
+        currentCoords: this.parseCoords(res.coordinates),
         cooldown: res.cooldown,
         players: res.players,
         message: res.description,
@@ -324,7 +325,7 @@ class App extends Component {
             <h2>Room Details</h2>
             <p><strong>Room ID: </strong>{this.state.room_id}</p>
             <p><strong>Exits:</strong> {this.state.exits}</p>
-            <p><strong>Coordinates: </strong> x:{this.state.coords['x']}, y:{this.state.coords['y']}</p>
+            <p><strong>Coordinates: </strong> x:{this.state.currentCoords['x']} y:{this.state.currentCoords['y']}</p>
             <p><strong>Exits:</strong> {this.state.exits}</p>
             <p><strong>Cooldown:</strong> {this.state.count}</p>
             <input type="text" placeholder="target value here" onChange={this.onChangeHandler}/>
